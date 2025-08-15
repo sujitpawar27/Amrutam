@@ -56,6 +56,7 @@ yarn-error.log*
 dist/
 build/
 .out/
+.next/
 
 coverage/
 
