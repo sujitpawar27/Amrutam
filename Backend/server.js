@@ -4,14 +4,16 @@ const cors = require("cors");
 require("dotenv").config();
 const appointmentsRouter = require("./routes/appointments");
 const doctorRoutes = require("./routes/doctor");
+const authRoutes = require("./routes/auth");
+
 const app = express();
 
 app.use(cors({ origin: "*" }));
 
 app.use(express.json());
-
-app.use("/api/appointments", appointmentsRouter);
 app.use("/api/doctors", doctorRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/appointments", appointmentsRouter);
 
 mongoose
   .connect(process.env.MONGO_URI, {

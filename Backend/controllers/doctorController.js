@@ -6,8 +6,14 @@ exports.getAllDoctors = async (req, res) => {
   try {
     const { specialization, mode } = req.query;
     const query = {};
-    if (specialization) query.specialization = specialization;
-    if (mode) query.mode = mode;
+
+    if (specialization && specialization !== "all") {
+      query.specialization = specialization;
+    }
+
+    if (mode && mode !== "all") {
+      query.mode = mode;
+    }
 
     const doctors = await Doctor.find(query);
     res.json(doctors);
@@ -17,7 +23,6 @@ exports.getAllDoctors = async (req, res) => {
   }
 };
 
-// Get doctor by ID
 exports.getDoctorById = async (req, res) => {
   console.log("Fetching doctor with id:", req.params.id);
 

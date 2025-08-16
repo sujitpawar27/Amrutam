@@ -4,11 +4,11 @@ const router = express.Router();
 const apptCtrl = require("../controllers/appointments");
 const auth = require("../middleware/auth");
 
-router.get("/:doctorId", apptCtrl.getAppointmentsByDoctor);
-router.get("/doctor/:id/slots", apptCtrl.getSlots); // public or protected
-router.post("/lock", apptCtrl.lockSlot); // protect with auth
-router.post("/confirm", apptCtrl.confirmAppointment); // protect with auth
-router.delete("/:id", apptCtrl.cancelAppointment); // protect
-router.put("/:id/reschedule", apptCtrl.rescheduleAppointment); // protect
+router.get("/:doctorId", auth, apptCtrl.getAppointmentsByDoctor);
+router.get("/doctor/:id/slots", auth, apptCtrl.getSlots);
+router.post("/lock", auth, apptCtrl.lockSlot);
+router.post("/confirm", auth, apptCtrl.confirmAppointment);
+router.delete("/:id", auth, apptCtrl.cancelAppointment);
+router.put("/:id/reschedule", auth, apptCtrl.rescheduleAppointment);
 
 module.exports = router;
