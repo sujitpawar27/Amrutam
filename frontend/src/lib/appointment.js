@@ -8,51 +8,61 @@ export async function getDoctorSlots(doctorId, date) {
 }
 
 // Lock a slot and get OTP
-export async function lockSlot({ userId, doctorId, slotTime }) {
+export async function lockSlot({ doctorId, slotTime, notes }) {
   const res = await api.post("/appointments/lock", {
-    userId,
-    doctorId,
-    slotTime,
-  });
-  return res.data; // { message, appointmentId, otp }
-}
-
-// Confirm a booked slot with OTP
-export async function confirmAppointment({
-  userId, // replace with logged-in user ID
-  doctorId,
-  slotTime,
-  notes,
-  otp,
-}) {
-  const res = await api.post("/appointments/confirm", {
-    userId,
     doctorId,
     slotTime,
     notes,
-    otp,
   });
-  return res.data;
+  return res.data; // { message, otp }
+}
+
+// Confirm a booked slot with OTP
+export async function confirmAppointment({ doctorId, otp }) {
+  try {
+    const res = await api.post("/appointments/confirm", {
+      doctorId,
+      otp,
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error confirming appointment:", error);
+    throw error;
+  }
 }
 
 // Cancel an appointment
 export async function cancelAppointment(appointmentId) {
-  const res = await api.delete(`/appointments/${appointmentId}`);
-  return res.data;
+  try {
+    const res = await api.delete(`/appointments/${appointmentId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error canceling appointment:", error);
+    throw error;
+  }
 }
 
 export async function rescheduleAppointment({ appointmentId, newSlotTime }) {
-  console.log("Rescheduling appointment:", appointmentId, "to:", newSlotTime);
+  try {
+    console.log("Rescheduling appointment:", appointmentId, "to:", newSlotTime);
 
-  const res = await api.put(`/appointments/${appointmentId}/reschedule`, {
-    newSlotTime,
-  });
-  return res.data;
+    const res = await api.patch(`/appointments/${appointmentId}/reschedule`, {
+      newSlotTime,
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error rescheduling appointment:", error);
+    throw error;
+  }
 }
 
-export async function getUserAppointments(userId, doctorId) {
-  const res = await api.get(`/appointments/${doctorId}`, {
-    params: { userId },
-  });
-  return res.data;
+export async function getUserAppointments(doctorId) {
+  try {
+    const res = await api.get(`/appointments/${doctorId}`);
+    console.log("Appointments response:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching user appointments:", error);
+    return { appointments: [] };
+  }
 }

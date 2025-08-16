@@ -45,8 +45,6 @@ export default function LoginPage() {
     try {
       if (isLogin) {
         const data = await signin(formData.email, formData.password);
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
         router.push("/");
       } else {
         if (formData.password !== formData.confirmPassword) {
@@ -59,7 +57,7 @@ export default function LoginPage() {
           formData.email,
           formData.password
         );
-        localStorage.setItem("token", data.token);
+        // localStorage.setItem("token", data.token);
         router.push("/");
       }
       setError(""); // clear error if success

@@ -33,6 +33,7 @@ import {
   confirmAppointment,
   rescheduleAppointment,
 } from "@/lib/appointment";
+import { checkAuth } from "@/lib/auth";
 
 export default function BookAppointmentModal({
   doctor,
@@ -65,6 +66,18 @@ export default function BookAppointmentModal({
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [user, setUser] = useState(null);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkUserAuth = async () => {
+      const authResult = await checkAuth();
+      if (authResult.authenticated) {
+        setUser(authResult.user);
+      }
+    };
+    checkUserAuth();
+  }, []);
 
   useEffect(() => {
     if (formData.date) {
@@ -82,7 +95,6 @@ export default function BookAppointmentModal({
     try {
       setLoading(true);
       const res = await lockSlot({
-        userId: "689dbf9887b33ac0090d630a", // replace with logged-in user ID
         doctorId,
         slotTime: formData.slot,
         notes: formData.notes,
@@ -92,6 +104,7 @@ export default function BookAppointmentModal({
       alert(`OTP sent: ${res.otp}`);
     } catch (err) {
       console.error(err);
+      alert("Failed to lock slot. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -102,26 +115,23 @@ export default function BookAppointmentModal({
     try {
       setLoading(true);
       let appointment;
-
+      
       if (isRescheduling) {
         const res = await rescheduleAppointment({
           appointmentId: prefillData._id || prefillData.appointmentId,
           newSlotTime: formData.slot,
         });
-        appointment = res.data || res;
+        appointment = res;
         setSuccessMsg("✅ Appointment rescheduled successfully!");
       } else {
         const res = await confirmAppointment({
-          userId: "689dbf9887b33ac0090d630a",
           doctorId,
-          slotTime: formData.slot,
-          notes: formData.notes,
           otp,
         });
 
         if (res?.appointment) {
           setSuccessMsg("✅ Appointment confirmed successfully!");
-          onSuccess(res.data);
+          onSuccess(res);
         }
       }
 
@@ -131,6 +141,7 @@ export default function BookAppointmentModal({
       }, 2000);
     } catch (err) {
       console.error(err);
+      alert("Failed to confirm appointment. Please try again.");
     } finally {
       setLoading(false);
     }

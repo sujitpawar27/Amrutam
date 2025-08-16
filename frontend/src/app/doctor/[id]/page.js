@@ -43,6 +43,7 @@ import {
   cancelAppointmentById,
   cancelAppointment,
 } from "@/lib/appointment";
+import { checkAuth } from "@/lib/auth";
 import BookAppointmentModal from "@/components/BookAppointmentModal";
 
 export default function DoctorDetails() {
@@ -54,8 +55,18 @@ export default function DoctorDetails() {
   const [prefillData, setPrefillData] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [user, setUser] = useState(null);
 
-  const userId = "689dbf9887b33ac0090d630a"; // Replace with real logged-in user ID
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkUserAuth = async () => {
+      const authResult = await checkAuth();
+      if (authResult.authenticated) {
+        setUser(authResult.user);
+      }
+    };
+    checkUserAuth();
+  }, []);
 
   // Fetch doctor details
   useEffect(() => {
@@ -76,12 +87,16 @@ export default function DoctorDetails() {
   // Load appointments
   const loadAppointments = async () => {
     try {
-      const all = await getUserAppointments(userId, doctorId);
+      const all = await getUserAppointments(doctorId);
+      console.log("Raw appointments response:", all);
+
       const arr = Array.isArray(all)
         ? all
         : Array.isArray(all.appointments)
         ? all.appointments
         : [];
+
+      console.log("Processed appointments array:", arr);
 
       const filtered = arr.filter(
         (a) => String(a.doctorId) === String(doctorId)
@@ -91,13 +106,14 @@ export default function DoctorDetails() {
       setAppointments(filtered);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setAppointments([]);
     }
   };
 
   useEffect(() => {
-    if (userId && doctorId) loadAppointments();
+    if (doctorId) loadAppointments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, doctorId]);
+  }, [doctorId]);
 
   const handleReschedule = (appointment) => {
     setPrefillData(appointment);
@@ -188,7 +204,7 @@ export default function DoctorDetails() {
       (appointment) => appointment.status.toLowerCase() === status
     ).length;
   };
-
+  // 1. Show spinner first while loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
@@ -197,7 +213,8 @@ export default function DoctorDetails() {
     );
   }
 
-  if (!doctor) {
+  // 2. Only show "Doctor Not Found" if loading is finished AND no doctor
+  if (!doctor && !loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
         <Card className="max-w-md mx-auto shadow-xl">
@@ -217,7 +234,6 @@ export default function DoctorDetails() {
 
   const filteredUpcomingAppointments = getFilteredAppointments("upcoming");
   const filteredPastAppointments = getFilteredAppointments("past");
-  console.log("Doctor Page Rendered", doctor);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">

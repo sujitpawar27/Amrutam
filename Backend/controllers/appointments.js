@@ -27,12 +27,11 @@ async function getUnavailableSlots(doctorId, startISO, endISO) {
   return booked.map((a) => new Date(a.slotTime).toISOString());
 }
 
-// GET /doctors/:id/slots?date=2025-08-14
 // Generate available slots by comparing doctor's availability -> remove unavailable
 exports.getSlots = async (req, res) => {
   try {
-    const { id } = req.params; 
-    const { date } = req.query; 
+    const { id } = req.params;
+    const { date } = req.query;
     if (!date)
       return res
         .status(400)
@@ -52,7 +51,7 @@ exports.getSlots = async (req, res) => {
 
     const slotsISO = dayAvailability.slots.map((t) => {
       const [hours, minutes] = t.split(":").map(Number);
-      const localDate = new Date(date); 
+      const localDate = new Date(date);
       localDate.setHours(hours, minutes, 0, 0);
       return localDate.toISOString();
     });
@@ -78,8 +77,9 @@ exports.getSlots = async (req, res) => {
 exports.lockSlot = async (req, res) => {
   try {
     console.log("Locking slot:", req.body);
-    const { userId, doctorId, slotTime } = req.body;
-    if (!userId || !doctorId || !slotTime)
+    const { doctorId, slotTime } = req.body;
+    const userId = req.userId;
+    if (!doctorId || !slotTime)
       return res.status(400).json({ message: "Missing fields" });
 
     const slotISO = toISO(slotTime);
@@ -131,8 +131,8 @@ exports.confirmAppointment = async (req, res) => {
   try {
     console.log("Confirming appointment:", req.body);
 
-    const { doctorId, userId } = req.body;
-    const { otp } = req.body;
+    const { doctorId, otp } = req.body;
+    const userId = req.userId;
 
     if (!otp) {
       return res.status(400).json({ message: "Missing fields" });
@@ -157,6 +157,14 @@ exports.confirmAppointment = async (req, res) => {
       status: "Booked",
       createdAt: new Date(),
     });
+
+    // Clean up Redis lock
+    await redis.del(`lock:${userId}:${doctorId}`);
+    await releaseLockIfMatch(
+      doctorId,
+      lockData.slotISO,
+      lockData.lockToken
+    );
 
     return res.json({ message: "Appointment confirmed", appointment });
   } catch (err) {
@@ -253,23 +261,32 @@ exports.rescheduleAppointment = async (req, res) => {
 };
 
 exports.getAppointmentsByDoctor = async (req, res) => {
-  console.log("Fetching appointments for doctor:", req.query);
 
   try {
     const { doctorId } = req.params;
-    const { userId } = req.query;
-    if (!doctorId)
+    const userId = req.userId;
+    
+    console.log("DoctorId from params:", doctorId);
+    console.log("UserId from auth:", userId);
+    
+    if (!doctorId) {
       return res.status(400).json({ message: "doctorId required" });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
 
     const appointments = await Appointment.find({
-      doctorId,
-      userId,
+      doctorId: doctorId,
+      userId: userId,
     }).populate("userId", "name email");
+    
     console.log("Found appointments:", appointments);
 
     res.json({ appointments });
   } catch (err) {
-    console.error(err);
+    console.error("Error in getAppointmentsByDoctor:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };

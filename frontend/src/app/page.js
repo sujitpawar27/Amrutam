@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Users, LogIn } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { fetchDoctors } from "@/lib/doctor";
+import { checkAuth, logout } from "@/lib/auth";
 
 export default function Home() {
   const [doctors, setDoctors] = useState([]);
@@ -18,21 +19,26 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
-  // Check token on mount
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    router.push("/login");
+  const refreshAuthStatus = async () => {
+    const res = await checkAuth();
+    setIsLoggedIn(res.authenticated);
   };
 
-  const handleDoctorClick = (doctorId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+  useEffect(() => {
+    refreshAuthStatus();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      await refreshAuthStatus();
+      router.push("/login");
+    }
+  };
+
+  const handleDoctorClick = async (doctorId) => {
+    if (!isLoggedIn) {
       router.push("/login");
       return;
     }

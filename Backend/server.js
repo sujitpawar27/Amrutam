@@ -5,10 +5,15 @@ require("dotenv").config();
 const appointmentsRouter = require("./routes/appointments");
 const doctorRoutes = require("./routes/doctor");
 const authRoutes = require("./routes/auth");
-
+const cookieParser = require("cookie-parser");
 const app = express();
 
-app.use(cors({ origin: "*" }));
+// Update CORS configuration to handle credentials properly
+app.use(cors({ 
+  origin: process.env.FRONTEND_URL || "http://localhost:3000", // Replace with your frontend URL
+  credentials: true // This is required for cookies to be sent
+}));
+app.use(cookieParser());
 
 app.use(express.json());
 app.use("/api/doctors", doctorRoutes);

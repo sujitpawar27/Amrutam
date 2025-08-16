@@ -16,14 +16,20 @@ exports.signup = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      passwordHash: hashedPassword, // use passwordHash instead of password
+      passwordHash: hashedPassword,
     });
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax", // Changed from "strict" to "lax" for better compatibility
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.status(201).json({
       user: { id: user._id, name: user.name, email: user.email },
-      token,
     });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -44,13 +50,40 @@ exports.signin = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax", // Changed from "strict" to "lax" for better compatibility
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.json({
       user: { id: user._id, name: user.name, email: user.email },
-      token,
     });
   } catch (err) {
     console.log("Error during sign-in:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.logout = async (_req, res) => {
+  // clear with same attributes to be safe
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+  return res.json({ message: "Logged out" });
+};
+
+exports.isAuthenticated = async (req, res) => {
+  // req.userId is set by auth middleware
+  console.log("User ID from auth middleware:", req.userId);
+  try {
+    const user = await User.findById(req.userId).select("_id name email");
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    return res.json({ authenticated: true, user });
+  } catch (err) {
+    return res.status(500).json({ message: "Server error" });
   }
 };

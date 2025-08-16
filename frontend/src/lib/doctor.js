@@ -1,4 +1,5 @@
 import api from "./api";
+import Cookies from "js-cookie";
 
 export const fetchDoctors = async (filters = {}) => {
   const { specialization, mode } = filters;
@@ -8,6 +9,16 @@ export const fetchDoctors = async (filters = {}) => {
 
 // Fetch a single doctor by ID
 export const fetchDoctorById = async (id) => {
-  const res = await api.get(`/doctors/${id}`);
-  return res.data;
+  const token = Cookies.get("token");
+  try {
+    const res = await api.get(`/doctors/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching doctor by ID:", error);
+    return null;
+  }
 };
