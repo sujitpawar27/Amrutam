@@ -204,16 +204,62 @@ export default function DoctorDetails() {
       (appointment) => appointment.status.toLowerCase() === status
     ).length;
   };
-  // 1. Show spinner first while loading
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
 
-  // 2. Only show "Doctor Not Found" if loading is finished AND no doctor
+if (loading) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="relative overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-4">
+            <div className="flex items-start space-x-4">
+              <div className="h-24 w-24 rounded-full bg-white/30 animate-pulse" />
+              <div className="flex-1 space-y-3">
+                <div className="h-6 w-40 bg-white/30 rounded animate-pulse" />
+                <div className="h-4 w-32 bg-white/20 rounded animate-pulse" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-8 space-y-6">
+            <div className="h-5 w-1/3 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse" />
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="h-10 bg-gray-200 rounded animate-pulse" />
+              <div className="h-10 bg-gray-200 rounded animate-pulse" />
+            </div>
+            <div className="h-12 bg-gray-200 rounded animate-pulse w-full" />
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b p-6">
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-2" />
+            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse" />
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg animate-pulse"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="h-10 w-10 bg-gray-200 rounded-full" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-40 bg-gray-200 rounded" />
+                    <div className="h-4 w-24 bg-gray-200 rounded" />
+                  </div>
+                </div>
+                <div className="h-8 w-20 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+
   if (!doctor && !loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
