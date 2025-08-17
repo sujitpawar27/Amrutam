@@ -67,17 +67,24 @@ exports.signin = async (req, res) => {
 };
 
 exports.logout = async (_req, res) => {
-  // clear with same attributes to be safe
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/",
   });
+
+  console.log("User logged out:", _req.userId);
   return res.json({ message: "Logged out" });
 };
 
 exports.isAuthenticated = async (req, res) => {
-  console.log("User ID from auth middleware:", req.userId);
+  console.log("Auth check initiated", req.cookies);
+
+  if (!req.cookies.token) {
+    return res.json({ authenticated: false });
+  }
+
   try {
     const user = await User.findById(req.userId).select("_id name email");
     if (!user) return res.status(401).json({ message: "Unauthorized" });

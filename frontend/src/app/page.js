@@ -21,6 +21,7 @@ export default function Home() {
 
   const refreshAuthStatus = async () => {
     const res = await checkAuth();
+    console.log("Auth check response:", res);
     setIsLoggedIn(res.authenticated);
   };
 
@@ -30,10 +31,18 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      await logout();
-    } finally {
-      await refreshAuthStatus();
-      router.push("/login");
+      const res = await logout(); // call API
+      console.log("Logout response:", res);
+
+      // Check server response
+      if (res.data?.message === "Logged out" && res.status == 200) {
+        setIsLoggedIn(false);
+        router.push("/");
+      } else {
+        console.error("Unexpected logout response:", res);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
