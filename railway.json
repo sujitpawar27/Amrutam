@@ -2,7 +2,7 @@
   "project": "e6ce3e13-9c7b-452f-be5a-2f3d9e2b1a90",
   "services": [
     {
-      "name": "Backend",
+      "name": "backend",
       "path": "Backend",
       "startCommand": "npm start",
       "buildCommand": "npm install"
