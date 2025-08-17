@@ -96,7 +96,7 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                HealthCare Pro
+                Find Your Doctor
               </h1>
               <p className="text-sm text-gray-600">Your health, our priority</p>
             </div>
@@ -108,7 +108,7 @@ export default function LoginPage() {
                 Welcome to the
                 <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                   {" "}
-                  healthcare
+                  Find Your Doctor
                 </span>
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed">
