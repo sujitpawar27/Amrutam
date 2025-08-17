@@ -1,0 +1,11 @@
+{
+  "project": "45bad085-99c8-49bd-b98b-9f78bcfe001d",
+  "services": [
+    {
+      "name": "Backend",
+      "path": "Backend",
+      "startCommand": "npm start",
+      "buildCommand": "npm install"
+    }
+  ]
+}
