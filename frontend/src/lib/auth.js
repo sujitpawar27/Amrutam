@@ -15,11 +15,6 @@ export async function checkAuth() {
     const { data } = await api.get("/auth/isAuthenticated");
     return { authenticated: true, user: data.user };
   } catch (error) {
-    console.log(
-      "Auth check failed:",
-      error.response?.status,
-      error.response?.data
-    );
     return { authenticated: false, user: null };
   }
 }

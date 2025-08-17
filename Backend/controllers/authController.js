@@ -53,8 +53,8 @@ exports.signin = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax", // Changed from "strict" to "lax" for better compatibility
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -79,8 +79,6 @@ exports.logout = async (_req, res) => {
 };
 
 exports.isAuthenticated = async (req, res) => {
-  console.log("Auth check initiated", req.cookies);
-
   if (!req.cookies.token) {
     return res.json({ authenticated: false });
   }
