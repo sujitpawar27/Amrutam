@@ -8,13 +8,8 @@ const authRoutes = require("./routes/auth");
 const cookieParser = require("cookie-parser");
 const app = express();
 
-// Update CORS configuration to handle credentials properly
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors({ origin: "*", credentials: true }));
+
 app.use(cookieParser());
 
 app.use(express.json());
