@@ -71,13 +71,12 @@ exports.logout = async (_req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
   });
   return res.json({ message: "Logged out" });
 };
 
 exports.isAuthenticated = async (req, res) => {
-  // req.userId is set by auth middleware
   console.log("User ID from auth middleware:", req.userId);
   try {
     const user = await User.findById(req.userId).select("_id name email");
