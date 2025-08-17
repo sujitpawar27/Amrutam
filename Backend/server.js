@@ -13,6 +13,9 @@ app.use(cors({ origin: "*", credentials: true }));
 app.use(cookieParser());
 
 app.use(express.json());
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/appointments", appointmentsRouter);
